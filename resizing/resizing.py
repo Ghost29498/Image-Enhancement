@@ -6,10 +6,10 @@ import copy
 from pyBlur import *
 class Resizing:
 	def __init__(self,modelPath):
-	    """
+		"""
 	    Initializes the model
 	    Parameters:
-		modelPath: 'Path to Model'
+			modelPath: 'Path to Model'
 	    """
 	    model = arch.RRDBNet(3, 3, 64, 23, gc=32)
 	    model.load_state_dict(torch.load(modelPath), strict=True)
@@ -20,10 +20,10 @@ class Resizing:
 	    """
 	    Blurs the image outside the given portion
 	    Parameters:
-		image: contains image
-		portion: contains the coordinates of the region not to blur [x1,y1,x2,y2]
+			image: contains image
+			portion: contains the coordinates of the region not to blur [x1,y1,x2,y2]
 	    Returns:
-		image with blurred background
+			image with blurred background
 	    """
 	    shape = image.shape
 	    x1,y1,x2,y2 = portion
@@ -42,9 +42,9 @@ class Resizing:
 	    Superimposes the newImage over the image
 	    Parameters:
 	    	image: background image to superimpose
-	  	newImage: image to paste on the background image
+	  		newImage: image to paste on the background image
 	    Returns:
-	  	returns required image
+	  		returns required image
 	    """
 	    shape1 = image.shape
 	    shape2 = newImage.shape
@@ -52,13 +52,14 @@ class Resizing:
 	    pip_w = int((shape1[1]-shape2[1])/2)
 	    image[pip_h:pip_h+shape2[0],pip_w:pip_w+shape2[1]] = newImage
 	    return(image,pip_w,pip_h)
+	
 	def upscale(self,img,model):
 	    """
 	    upscales the given img X 4
 	    Parameters:
-	  	img: contains the image to upscale
+	  		img: contains the image to upscale
 	    Returns:
-	  	upscaled image
+	  		upscaled image
 	    """
 	    device = torch.device('cpu')
 	    model = model.to(device)
@@ -73,42 +74,42 @@ class Resizing:
 	    return(output)
 
 	def calculateDimention(self,height,width,aspectRatio):
-	  """
-	  Calculates the new dimention
-	  Parameters:
-	    height: The height required
-	    width: The width required
-	  Returns:
-	    The new width and new height of image
-	  """
-	  while(height > 0):
-		  newWidth = int(aspectRatio*height)
-		  newHeight = height
-		  if(newWidth <= width):
-		      break
-		  height = height -1
-	  return(newWidth,newHeight)
+		"""
+		Calculates the new dimention
+		Parameters:
+			height: The height required
+			width: The width required
+		Returns:
+			The new width and new height of image
+		"""
+		while(height > 0):
+			newWidth = int(aspectRatio*height)
+			newHeight = height
+			if(newWidth <= width):
+				break
+			height = height -1
+		  	return(newWidth,newHeight)
 
 	def shrink(self,img,newHeight,newWidth,height,width):
-	  """
-	  shrinks the image
-	  Parameters:
-	    img: 'The image to be resized'
-	    newWidth: 'new width'
-	    newHeight: 'new height'
-	  Returns:
-	    False if image does not fit properly
-	    The shrinked image if it fits
-	  """
-	  img = cv2.resize(img,(newWidth,newHeight), interpolation = cv2.INTER_CUBIC)
-	  background = cv2.resize(im,(newWidth,newHeight), interpolation = cv2.INTER_CUBIC)
-	  image,stX,stY = self.superImpose(background,img)
-	  image = self.blurOut(image,[stX,stY,stX+img.shape[1],stY+img.shape[0]])
-	  diff = np.abs((width-newWidth)-(height-newHeight))
-	  if(diff > 600):
-	    print('Image Size Does not match')
-	    image = False
-	  return(image)
+		"""
+		shrinks the image
+		Parameters:
+			img: 'The image to be resized'
+			newWidth: 'new width'
+			newHeight: 'new height'
+		Returns:
+			False if image does not fit properly
+			The shrinked image if it fits
+		"""
+		img = cv2.resize(img,(newWidth,newHeight), interpolation = cv2.INTER_CUBIC)
+		background = cv2.resize(im,(newWidth,newHeight), interpolation = cv2.INTER_CUBIC)
+		image,stX,stY = self.superImpose(background,img)
+		image = self.blurOut(image,[stX,stY,stX+img.shape[1],stY+img.shape[0]])
+		diff = np.abs((width-newWidth)-(height-newHeight))
+		if(diff > 600):
+		print('Image Size Does not match')
+		image = False
+		return(image)
 
 	def enlarge(self,im,newHeight,newWidth,height,width,model):
 	    """
@@ -122,59 +123,50 @@ class Resizing:
 	    """
 	    reqRatio = newHeight/im.shape[0]
 	    n_x4 = reqRatio/4
-	    if(n_x4-int(n_x4)>0.5):
-	      n_x4 = np.ceil(n_x4)
-	    else:
-	      n_x4 = np.floor(n_x4)
-	    i = 0
+		n_x4 = int(np.round(n_x4))
 	    img = copy.deepcopy(im)
-	    flag = False
-	    while(i<n_x4):
-		print('upscaling')
-		img = self.upscale(img,model)
-		flag = True            
-		i = i + 1
-	    if(flag):
-		img = cv2.resize(img,(newWidth,newHeight), interpolation = cv2.INTER_CUBIC)
-	    #print('Difference : ',np.abs((width-newWidth)-(height-newHeight)))
+		for i in range(n_x4):
+			print('upscaling')
+			img = self.upscale(img,model)
+	    if(n_x4 != 0):
+			img = cv2.resize(img,(newWidth,newHeight), interpolation = cv2.INTER_CUBIC)
 	    background = cv2.resize(im,(newWidth,newHeight), interpolation = cv2.INTER_CUBIC)
 	    image,stX,stY = self.superImpose(background,img)
 	    image = self.blurOut(image,[stX,stY,stX+img.shape[1],stY+img.shape[0]])
 	    diff = np.abs((width-newWidth)-(height-newHeight))
 	    if(diff > 600):
-	      image = False
-	      print('Image Size Does not match')
+	    	image = False
+	    	print('Image Size Does not match')
 	    return(image)
 
 	def resizing(self,imgPath,height,width,model):
-	  """
-	  Resizes images according to the given size
-	  Parameters:
-	    imgPath: 'path to image'
-	    height: 'required height'
-	    width: 'required width'
-	  Returns
-	    False if image does not fit the size
-	    new image if it is resized
-	  """
-	  flag = True
-	  newHeight, newWidth = 0,0
-	  im = cv2.imread(imgPath)
-	  shape = im.shape
-	  aspectRatio = shape[1]/shape[0]
-	  reqAspectRatio = width/height
-	  if(shape[0] == height and shape[1] == width):
-	    newWidth = width
-	    newHeight = height
-	  else:
-	    newWidth,newHeight = self.calculateDimention(height,width,aspectRatio)
-	  if(newHeight <= shape[0] and newWidth <= shape[1]):
-	      #shrink
-	      flag = self.shrink(im,newHeight,newWidth,height,width)
-	      return(flag)
-	  else:    
-	      flag =self.enlarge(im,newHeight,newWidth,height,width,model)
-	      return(flag)
+		"""
+		Resizes images according to the given size
+		Parameters:
+			imgPath: 'path to image'
+			height: 'required height'
+			width: 'required width'
+		Returns
+			False if image does not fit the size
+			new image if it is resized
+		"""
+		flag = True
+		newHeight, newWidth = 0,0
+		im = cv2.imread(imgPath)
+		shape = im.shape
+		aspectRatio = shape[1]/shape[0]
+		reqAspectRatio = width/height
+		if(shape[0] == height and shape[1] == width):
+			newWidth = width
+			newHeight = height
+		else:
+			newWidth,newHeight = self.calculateDimention(height,width,aspectRatio)
+		if(newHeight <= shape[0] and newWidth <= shape[1]):
+		  	flag = self.shrink(im,newHeight,newWidth,height,width)
+		  	return(flag)
+		else:    
+		  	flag =self.enlarge(im,newHeight,newWidth,height,width,model)
+		  	return(flag)
 	  
 #sample code to run
 if __name__=="main":
