@@ -1,4 +1,4 @@
-Resizing images
+# Resizing images
 
 The given image is resized to the given size
 runResizing.ipynb has an example program on how it works
