@@ -1,4 +1,4 @@
-# Motion Deblur Removal
+# Motion Blur Removal
  
 init(modelPath) -> initializes the model, accepts model path as a parameter returns the model
 
