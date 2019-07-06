@@ -50,7 +50,7 @@ class ArtifactsRemoval:
     img = Image.open(imgPath)
     size = img.width//2,img.height//2 
     img = img.resize(size)
-    img_hr = process(img)
+    img_hr = self.process(img)
     return(img_hr)
   
 #sample code for using the module
