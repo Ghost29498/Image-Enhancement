@@ -1,4 +1,4 @@
-Artifacts removal
+# Artifacts removal
 
 Artifacts is the distortions due to the effect of compressing image
 
