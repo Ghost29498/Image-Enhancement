@@ -10,6 +10,7 @@ class Resizing:
 	    Initializes the model
 	    Parameters:
 			modelPath: 'Path to Model'
+        Architecture
 	    """
 	    model = arch.RRDBNet(3, 3, 64, 23, gc=32)
 	    model.load_state_dict(torch.load(modelPath), strict=True)
