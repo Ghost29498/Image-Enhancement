@@ -1,0 +1,2 @@
+functools==0.5
+torch==1.1.0
