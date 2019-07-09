@@ -1,5 +1,6 @@
 # Motion Blur Removal
  
-init(modelPath) -> initializes the model, accepts model path as a parameter returns the model
+ removes motion blur of image
 
-removeBlur(imagePath,deblur) -> removes blur from image, accepts path to image and the model as arguments returns the image without blur
+references:
+http://www.xtao.website/projects/srndeblur/srndeblur_cvpr18.pdf
